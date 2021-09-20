@@ -1,5 +1,5 @@
 {{#each episode}}
-    <div class="episode">
+    <div class="episode" data-episode-id="{{ID}}">
         <div class="image">
             <a href="/watch?ser={{seriesId}}&id={{ID}}" >
             {{#if imgLink}}
@@ -29,7 +29,4 @@
             {{/if}}
         </div>
     </div>
-    {{#if includeBottomBorder}}
-        <hr />
-    {{/if}}
 {{/each}}

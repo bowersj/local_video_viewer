@@ -1,3 +1,51 @@
-<div class="scroll-y container">
+<label>
+    <input id="searchInput" type="text" placeholder="Search..." />
+</label>
+<div id="episodeListContainer" class="scroll-y container" data-episodes="{{JSON2string episode}}" >
     {{> episodeList }}
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lunr/lunr.js"></script>
+<style>
+    .hidden{
+        display: none;
+    }
+</style>
+<script>
+    const epContainer = $( "#episodeListContainer" )
+    const episode = epContainer.children();
+    const docs = epContainer.data( "episodes" );
+
+    const idx = lunr(function () {
+        this.ref( 'ID' )
+        this.field( 'title' )
+        this.field( 'season' )
+        this.field( 'number' )
+        this.field( 'description' )
+        this.field( 'airDate' )
+        this.field( 'rating' )
+        this.field( 'raters' )
+
+        docs.forEach(function (doc) {
+            this.add(doc)
+        }, this)
+    });
+
+    $( "#searchInput" ).change( function(){
+        const resMap = idx.search( this.value ).reduce( ( acc, result ) => {
+            acc[ result.ref ] = true;
+            return acc;
+        }, Object.create( null ) );
+
+        episode.each(function( idx, ep ){
+            let ep1 = $( ep );
+            if( !resMap[ ep1.data( "episodeId" ) ] )
+                ep1.addClass( "hidden" );
+            else
+                ep1.removeClass( "hidden" );
+        });
+    })
+
+</script>
