@@ -1,0 +1,35 @@
+{{#each episode}}
+    <div class="episode">
+        <div class="image">
+            <a href="/watch?ser={{seriesId}}&id={{ID}}" >
+            {{#if imgLink}}
+                <img src="{{imgLink}}" alt="{{series}}: {{title}}">
+            {{else}}
+                <p>{{series}}: {{title}}</p>
+            {{/if}}
+            </a>
+        </div>
+        <div>
+            <strong><a href="/watch?ser={{seriesId}}&id={{ID}}" >{{title}}</a></strong>
+            <div>
+                <div>Season: {{season}}</div>
+                <div>Episode: {{number}}</div>
+            </div>
+            {{#if airDate}}
+                <div class="air-date">Air Date: {{airDate}}</div>
+            {{/if}}
+
+            <div></div>
+
+            {{#if rating}}
+                <p>Rating: {{rating}} ({{raters}})</p>
+            {{/if}}
+            {{#if description}}
+                <p>{{description}}</p>
+            {{/if}}
+        </div>
+    </div>
+    {{#if includeBottomBorder}}
+        <hr />
+    {{/if}}
+{{/each}}

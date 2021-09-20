@@ -1,0 +1,13 @@
+<div class="grid columns-auto-fill">
+    {{#each series}}
+        <div class="image">
+            <a href="/series_episodes?ser={{seriesId}}" >
+                {{#if imgSrc}}
+                    <img src="{{imgSrc}}" alt="{{series}}">
+                {{/if}}
+            </a>
+            <div sytle="text-align: center;"><p><strong>{{series}}</strong></p></div>
+            <div>{{description}}</div>
+        </div>
+    {{/each}}
+</div>

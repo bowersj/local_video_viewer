@@ -1,0 +1,66 @@
+/* Theme Colors
+ * primary:   #c74a3b (redish)
+ * secondary: #a23326 (darker redish)
+ * tertiary:  #ad8175 (rosybrown)
+ * contrast:  #689675 (greenish)
+ */
+
+.primary{
+    color: #c74a3b
+}
+
+.secondary{
+    color: #a23326
+}
+
+.tertiary{
+    color: #ad8175
+}
+
+.contrast{
+    color: #689675
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    font-family: 'Rubik', sans-serif;
+    color: #A1A1A1;
+    overflow-x: hidden;
+
+}
+
+.container {
+    padding: 2.5em;
+}
+
+.scroll-y {
+    overflow-y: auto;
+}
+
+a:link {
+    color: #c74a3b;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #c74a3b;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #a23326;
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+a:active {
+    color: #c74a3b;
+    background-color: transparent;
+    text-decoration: underline;
+}
