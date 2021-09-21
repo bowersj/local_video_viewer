@@ -4,6 +4,7 @@
   "description": "",
   "main": "toSeasonEpisodeData.js",
   "dependencies": {
+    "mime-types": "^2.1.32",
     "uuid": "^8.3.2"
   },
   "devDependencies": {},

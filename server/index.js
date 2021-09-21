@@ -1,34 +1,20 @@
 const fs = require("fs");
 const path = require( "path" );
 
+const mime = require('mime-types')
 const express = require("express");
 const exphbs = require('express-handlebars');
 
 const port = 3000;
 const app = express();
 
-const { videoRoot } = require( "./../constants.js" );
+const { mediaRoot, seriesDataRoot, episodeFileName } = require( "./../constants.js" );
 const { walk } = require( "./../walk.js" );
 
 
 // Data preparation
-let allVideoPaths = walk( videoRoot );
-let allEpisodeData = allVideoPaths
-    .filter( p => p.includes( "_mediaPlayerData.json" ) )
-    .reduce( ( acc, p ) => {
-            require( p ).forEach(function( epData ){
-               if( acc[ epData.seriesId ] )
-                   acc[ epData.seriesId ].push( epData )
-                else
-                   acc[ epData.seriesId ] = [ epData ];
-            });
 
-            return acc;
-        },
-        Object.create(null)
-    );
-
-let seriesData = require( path.join( videoRoot, "_allMediaPlayerSeriesData.json" ) )
+let seriesData = require( path.join( mediaRoot, "_allMediaPlayerSeriesData.json" ) )
 
 app.use(express.static(path.join( __dirname, "./JS" )));
 app.use(express.static(path.join( __dirname, "./css" )));
@@ -82,7 +68,7 @@ app.get('/watch', (req, res) => {
     const options = {
         layout: "media-video.hbs",
         video: {
-            src: `/video?ser=${seriesId}&id=${episodeId}`,
+            src: `/stream?ser=${seriesId}&id=${episodeId}`,
             type: "video/mp4",
             title: series,
             subtitle: title,
@@ -109,7 +95,7 @@ app.get('/watch', (req, res) => {
     res.render( 'video', options );
 });
 
-app.get("/video", function (req, res) {
+app.get("/stream", function (req, res) {
     // Ensure there is a range given for the video
     let range = req.headers.range || "0-";
     // console.log( req.headers )
@@ -124,7 +110,7 @@ app.get("/video", function (req, res) {
     try {
         episode = getEpisodeData( req );
     } catch( error ){
-        res.status( 404 ).send( "[/video]: " + error.message );
+        res.status( 404 ).send( "[/stream]: " + error.message );
         errorOccurred = true;
     }
 
@@ -148,7 +134,7 @@ app.get("/video", function (req, res) {
         "Content-Range": `bytes ${start}-${end}/${videoSize}`,
         "Accept-Ranges": "bytes",
         "Content-Length": contentLength,
-        "Content-Type": "video/mp4",
+        "Content-Type": mime.lookup( videoPath ),
     };
 
     // HTTP Status 206 for Partial Content
@@ -191,5 +177,24 @@ function getEpisodeData( req ){
 }
 
 function getAllEpisodesInSeries( seriesId ){
-    return allEpisodeData[ seriesId ];
+    let _seriesData = seriesData.find( s => s.seriesId === seriesId );
+
+    console.log( _seriesData );
+
+    if( !_seriesData )
+        throw new Error( `The series id, ${seriesId}, does not exist.` );
+
+    let episodeData = require( path.join( _seriesData.path, episodeFileName ) )
+
+    if( !episodeData )
+        throw new Error( `every series must have a file containing every episode's metadata named ${episodeFileName}` );
+
+    // return allEpisodeData[ seriesId ];
+
+    return episodeData;
+}
+
+
+function getSeriesData(){
+    return require( seriesDataRoot );
 }

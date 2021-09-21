@@ -7,7 +7,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/lunr/lunr.js"></script>
+<script src="./importedModules/lunr.js"></script>
 <style>
     .hidden{
         display: none;
@@ -19,14 +19,26 @@
     const docs = epContainer.data( "episodes" );
 
     const idx = lunr(function () {
+        // assume flat objects
         this.ref( 'ID' )
-        this.field( 'title' )
-        this.field( 'season' )
-        this.field( 'number' )
-        this.field( 'description' )
-        this.field( 'airDate' )
-        this.field( 'rating' )
-        this.field( 'raters' )
+
+        let props = Object.getOwnPropertyNames(
+            docs.reduce( function( acc, data ){
+
+                let ps = Object.getOwnPropertyNames( data );
+
+                for( let i = 0, l = ps.length; i < l; ++i ){
+                    if( !acc[ ps[i] ] )
+                        acc[ ps[i] ] = true;
+                }
+
+                return acc;
+            }, {})
+        );
+
+        for( let i = 0, l = props.length; i < l; ++i ){
+            this.field( props[i] );
+        }
 
         docs.forEach(function (doc) {
             this.add(doc)

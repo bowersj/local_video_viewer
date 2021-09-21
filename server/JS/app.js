@@ -113,11 +113,11 @@ $(function(){
         let hours = null;
 
         if(totalSecondsRemaining >= 3600) {
-            hours = (time.getHours().toString()).padStart('2', '0');
+            hours = (time.getHours().toString()).padStart( 2, '0' );
         }
 
-        let minutes = (time.getMinutes().toString()).padStart('2', '0');
-        let seconds = (time.getSeconds().toString()).padStart('2', '0');
+        let minutes = (time.getMinutes().toString()).padStart( 2, '0' );
+        let seconds = (time.getSeconds().toString()).padStart( 2, '0' );
 
         timeLeft.textContent = `${hours ? hours : '00'}:${minutes}:${seconds}`;
     });

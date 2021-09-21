@@ -4,11 +4,11 @@ const { v4: uuidv4 } = require( "uuid" );
 
 const { walk } = require( "./../walk.js" );
 
-const { videoRoot } = require( "./../constants.js" );
+const { mediaRoot } = require( "./../constants.js" );
 
 // console.log( videoRoot );
 
-const paths = walk( videoRoot );
+const paths = walk( mediaRoot );
 
 // console.log( paths );
 
@@ -127,4 +127,6 @@ for( let i = 0, l = episodeDataPaths.length; i < l; ++i ){
     }
 }
 
-fs.writeFileSync( path.join( videoRoot, "Castle", "_mediaPlayerData.json" ), JSON.stringify( allEpisodes ), "utf8" )
+
+
+fs.writeFileSync( path.join( mediaRoot, "Castle", "_mediaPlayerData.json" ), JSON.stringify( allEpisodes ), "utf8" )
