@@ -23,7 +23,8 @@ $(function(){
     const watchedBar = document.querySelector('.video-container .progress-controls .progress-bar .watched-bar');
     const timeLeft = document.querySelector('.video-container .progress-controls .time-remaining');
 
-    const next = document.querySelector( '.video-container .progress-controls .next' );
+    const next = document.querySelector( '.next' );
+    // const nextUrl = next.
     const episodes = $( '.episodes' );
 
     let controlsTimeout;
@@ -79,11 +80,9 @@ $(function(){
 
     document.addEventListener('fullscreenchange', () => {
         if (!document.fullscreenElement) {
-            qs.delete( "fullscreen" )
             maximizeButton.style.display = '';
             minimizeButton.style.display = 'none';
         } else {
-            qs.set( "fullscreen", "t" )
             maximizeButton.style.display = 'none';
             minimizeButton.style.display = '';
         }
@@ -146,6 +145,13 @@ $(function(){
 
     fullScreenButton.addEventListener('click', toggleFullScreen);
 
+    next.addEventListener(
+        'click',
+        function(){
+            window.location = $(next).data( "next" );
+        }
+    );
+
 // TODO: add event handlers for next episode, episode list
 
     const episodeList = $( "#episodes-list" );
@@ -182,10 +188,10 @@ $(function(){
 
 
     if( !!qs.get( "autoStart" ) ){
-        playPauseButton.click();
-    }
-
-    if( !!qs.get( "fullscreen" ) ){
-        toggleFullScreen();
+        try{
+            playPauseButton.click();
+        } catch( error ){
+            console.error(error);
+        }
     }
 })
