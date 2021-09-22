@@ -2,6 +2,9 @@ body {
     overflow: hidden;
 }
 
+.snazzymenu {
+    background-color: #A1A1A1;
+}
 .video-container {
     width: 100%;
     height: 100%;

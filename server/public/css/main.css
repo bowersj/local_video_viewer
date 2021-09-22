@@ -64,3 +64,24 @@ a:active {
     background-color: transparent;
     text-decoration: underline;
 }
+
+
+ul.hide-bullets {
+    list-style-type: none;
+}
+
+
+/* Menu config */
+div.top-menu{
+    padding-top: 10px;
+}
+
+div.top-menu ul li {
+    font-size: 1.2em;
+    display:inline;
+    padding: 10px;
+}
+
+div.top-menu ul li a {
+    text-decoration: none;
+}

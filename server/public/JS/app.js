@@ -1,4 +1,5 @@
 $(function(){
+    const menu = document.querySelector( 'nav' )
     const videoContainer = document.querySelector('.video-container');
     const video = document.querySelector('.video-container video');
 
@@ -32,12 +33,14 @@ $(function(){
 
     const displayControls = () => {
         controlsContainer.style.opacity = '1';
+        menu.style.opacity = '1';
         document.body.style.cursor = 'initial';
         if (controlsTimeout) {
             clearTimeout(controlsTimeout);
         }
         controlsTimeout = setTimeout(() => {
             controlsContainer.style.opacity = '0';
+            menu.style.opacity = '0';
             document.body.style.cursor = 'none';
         }, 5000);
     };
@@ -105,7 +108,6 @@ $(function(){
 
     video.addEventListener('timeupdate', () => {
         watchedBar.style.width = ((video.currentTime / video.duration) * 100) + '%';
-        // TODO: calculate hours as well...
         const totalSecondsRemaining = video.duration - video.currentTime;
         // THANK YOU: BEGANOVICH
         const time = new Date(null);

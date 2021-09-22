@@ -1,0 +1,20 @@
+<div id="jquery-script-menu" style="{{menu.style}}" class="top-menu">
+    {{#if (or menu series)}}
+        <ul class="hide-bullets">
+            {{#if menu.series }}
+                <li><a href="/">All Series</a></li>
+            {{/if}}
+
+            {{#if menu.episode }}
+                <li><a href="/series_episodes?ser={{menu.episode.seriesId}}">{{menu.episode.series}}</a></li>
+            {{/if}}
+
+            {{#if series }}
+                {{#each series}}
+                    <li><a href="/series_episodes?ser={{seriesId}}">{{series}}</a></li>
+                {{/each}}
+            {{/if}}
+        </ul>
+        <div class="jquery-script-clear"></div>
+    {{/if}}
+</div>

@@ -9,15 +9,12 @@ const port = 3000;
 const app = express();
 
 const { mediaRoot, seriesDataRoot, episodeFileName } = require( "./../constants.js" );
-const { walk } = require( "./../walk.js" );
-
-
-// Data preparation
-
 let seriesData = require( path.join( mediaRoot, "_allMediaPlayerSeriesData.json" ) )
 
-app.use(express.static(path.join( __dirname, "./JS" )));
-app.use(express.static(path.join( __dirname, "./css" )));
+
+app.use(express.static(path.join( __dirname, "./public" )));
+
+
 
 app.engine('hbs', exphbs({
     partialsDir:  __dirname + "/views/partials/",
@@ -29,8 +26,9 @@ app.engine('hbs', exphbs({
 
 app.set('view engine', 'hbs');
 
+
 app.get('/', (req, res) => {
-    res.render('series', { layout: "grid.hbs", series: seriesData });
+    res.render('series', { layout: "grid.hbs", menu:{ series: false }, series: seriesData });
 });
 
 app.get( '/series_episodes', ( req, res ) => {
@@ -40,7 +38,14 @@ app.get( '/series_episodes', ( req, res ) => {
         'episodes',
         {
             episode: getAllEpisodesInSeries( series ),
-            link: [ { href: "./episodeList.css" } ]
+            menu:{ series: true },
+            link: [
+                { href: "./css/episodeList.css" }
+            ],
+            script:[
+                { src: "./JS/importedModules/lunr.js" },
+                { src: "./JS/searchHelpers.js" },
+            ],
         }
     );
 });
@@ -60,7 +65,6 @@ app.get('/watch', (req, res) => {
     if( errorOccurred )
         return;
 
-
     const { season, seriesId, series, title, ID: episodeId, nextEpisode } = episode;
 
     const seriesEpisodeData = getAllEpisodesInSeries( seriesId );
@@ -74,6 +78,14 @@ app.get('/watch', (req, res) => {
             subtitle: title,
         },
         season,
+        script: [
+            { src: "./JS/app.js" },
+        ],
+        menu:{
+            series: true,
+            style: "position: absolute; z-index: 999;",
+            episode:{ seriesId: seriesId, series: series }
+        },
         episode: seriesEpisodeData.reduce( (acc, ep) => {
             ep.includeBottomBorder = true;
             if( ep.season === season ){
@@ -81,16 +93,15 @@ app.get('/watch', (req, res) => {
             }
 
             return acc;
-        }, [])
+        }, []),
     };
 
     if( nextEpisode ){
         let nxtEpData = seriesEpisodeData.find( epData => epData.path === nextEpisode );
 
         if( nxtEpData )
-            options.nextEpisode = `/watch?ser=${nxtEpData.seriesId}&id=${nxtEpData.ID}`;
+            options.nextEpisode = `/stream?ser=${nxtEpData.seriesId}&id=${nxtEpData.ID}`;
     }
-
 
     res.render( 'video', options );
 });
@@ -179,7 +190,7 @@ function getEpisodeData( req ){
 function getAllEpisodesInSeries( seriesId ){
     let _seriesData = seriesData.find( s => s.seriesId === seriesId );
 
-    console.log( _seriesData );
+    // console.log( _seriesData );
 
     if( !_seriesData )
         throw new Error( `The series id, ${seriesId}, does not exist.` );
