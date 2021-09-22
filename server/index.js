@@ -50,6 +50,7 @@ app.get( '/series_episodes', ( req, res ) => {
     );
 });
 
+
 app.get('/watch', (req, res) => {
 
     let errorOccurred = false;
@@ -96,11 +97,12 @@ app.get('/watch', (req, res) => {
         }, []),
     };
 
+
     if( nextEpisode ){
         let nxtEpData = seriesEpisodeData.find( epData => epData.path === nextEpisode );
 
         if( nxtEpData )
-            options.nextEpisode = `/stream?ser=${nxtEpData.seriesId}&id=${nxtEpData.ID}`;
+            options.nextEpisode = `/watch?ser=${nxtEpData.seriesId}&id=${nxtEpData.ID}&autoStart=true`;
     }
 
     res.render( 'video', options );

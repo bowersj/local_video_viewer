@@ -1,4 +1,5 @@
 $(function(){
+    const qs = new URLSearchParams( window.location.search );
     const menu = document.querySelector( 'nav' )
     const videoContainer = document.querySelector('.video-container');
     const video = document.querySelector('.video-container video');
@@ -78,9 +79,11 @@ $(function(){
 
     document.addEventListener('fullscreenchange', () => {
         if (!document.fullscreenElement) {
+            qs.delete( "fullscreen" )
             maximizeButton.style.display = '';
             minimizeButton.style.display = 'none';
         } else {
+            qs.set( "fullscreen", "t" )
             maximizeButton.style.display = 'none';
             minimizeButton.style.display = '';
         }
@@ -175,4 +178,14 @@ $(function(){
             of: ".episodes"
         });
     });
+
+
+
+    if( !!qs.get( "autoStart" ) ){
+        playPauseButton.click();
+    }
+
+    if( !!qs.get( "fullscreen" ) ){
+        toggleFullScreen();
+    }
 })
