@@ -160,6 +160,22 @@ app.get("/stream", function (req, res) {
     videoStream.pipe(res);
 });
 
+app.get( "/edit-episode", ( req, res )=>{
+    let doc = getEpisodeData( req );
+
+    let opts = {};
+    opts.layout = "form.hbs";
+    opts.script = [
+        { src: "./JS/form-episode.js" },
+    ];
+    res.render( "form-episode.hbs", opts );
+});
+
+app.get( "/series", ( req, res )=>{
+    res.json( seriesData.map( series => {
+        return { id: series.seriesId, value: series.series }
+    }) );
+});
 
 
 app.listen(port, () => {

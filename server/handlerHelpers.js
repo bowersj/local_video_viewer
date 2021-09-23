@@ -24,4 +24,10 @@ module.exports = {
     and: function( lval, rval ){ return lval &&  rval; },
     eq:  function( lval, rval ){ return lval === rval; },
     ne:  function( lval, rval ){ return lval !== rval; },
+
+    select: function( selected, options ){
+        return options.fn(this).replace(
+            new RegExp(' value=\"' + selected + '\"'),
+            '$& selected="selected"');
+    }
 }
