@@ -8,25 +8,26 @@
                         <p>{{series}}: {{title}}</p>
                     {{/if}}
             </div>
-            <div>
-                <strong>{{title}}</strong>
-                <div>
-                    <div>Season: {{season}}</div>
-                    <div>Episode: {{number}}</div>
-                </div>
-                {{#if airDate}}
-                    <div class="air-date">Air Date: {{airDate}}</div>
-                {{/if}}
-
-                <div></div>
-
-                {{#if rating}}
-                    <p>Rating: {{rating}} ({{raters}})</p>
-                {{/if}}
-                {{#if description}}
-                    <p>{{description}}</p>
-                {{/if}}
-            </div>
         </a>
+        <div>
+            <strong>{{title}}</strong>
+            <div>
+                <div>Season: {{season}}</div>
+                <div>Episode: {{number}}</div>
+            </div>
+            {{#if airDate}}
+                <div class="air-date">Air Date: {{airDate}}</div>
+            {{/if}}
+            <a href="/edit-episode?ser={{seriesId}}&id={{ID}}">Edit Data</a>
+            <div></div>
+
+            {{#if rating}}
+                <p>Rating: {{rating}} ({{raters}})</p>
+            {{/if}}
+            {{#if description}}
+                <p>{{description}}</p>
+            {{/if}}
+        </div>
+
     </div>
 {{/each}}

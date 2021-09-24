@@ -1,7 +1,8 @@
 .episode {
-    height: 180px;
+    /*height: 180px;*/
     margin: 10px;
     border-bottom: #A1A1A1 solid;
+    overflow: hidden;
 }
 
 .zero-z-index div {
@@ -23,7 +24,8 @@ div.image {
     padding: 2px 20px 0 5px;
     float: left;
     margin-bottom: -2px;
-    height: 180px;
+    /*height: 180px;*/
+    /*flex: 1 1 auto;*/
 }
 
 div.zero-z-index {

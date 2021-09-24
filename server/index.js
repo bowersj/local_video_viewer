@@ -1,19 +1,24 @@
 const fs = require("fs");
 const path = require( "path" );
 
+const { v4: uuidv4 } = require( "uuid" );
 const mime = require('mime-types')
 const express = require("express");
+var bodyParser = require('body-parser');
 const exphbs = require('express-handlebars');
 
 const port = 3000;
 const app = express();
 
 const { mediaRoot, seriesDataRoot, episodeFileName } = require( "./../constants.js" );
-let seriesData = require( path.join( mediaRoot, "_allMediaPlayerSeriesData.json" ) )
 
 
 app.use(express.static(path.join( __dirname, "./public" )));
-
+// for parsing application/json
+app.use(bodyParser.json());
+// for parsing application/xwww-
+app.use(bodyParser.urlencoded({ extended: true }));
+//form-urlencoded
 
 
 app.engine('hbs', exphbs({
@@ -28,7 +33,7 @@ app.set('view engine', 'hbs');
 
 
 app.get('/', (req, res) => {
-    res.render('series', { layout: "grid.hbs", menu:{ series: false }, series: seriesData });
+    res.render('series', { layout: "grid.hbs", menu:{ series: false }, series: getSeriesData() });
 });
 
 app.get( '/series_episodes', ( req, res ) => {
@@ -161,8 +166,6 @@ app.get("/stream", function (req, res) {
 });
 
 app.get( "/edit-episode", ( req, res )=>{
-    let doc = getEpisodeData( req );
-
     let opts = {};
     opts.layout = "form.hbs";
     opts.script = [
@@ -172,15 +175,70 @@ app.get( "/edit-episode", ( req, res )=>{
 });
 
 app.get( "/series", ( req, res )=>{
-    res.json( seriesData.map( series => {
+    res.json( getSeriesData().map( series => {
         return { id: series.seriesId, value: series.series }
     }) );
 });
 
+app.get( "/gen_id", ( req, res )=>{
+    res.send( uuidv4() );
+});
+
+app.get( "/data", ( req, res )=>{
+    let data = {};
+
+    try {
+        data = getEpisodeData( req );
+    } catch ( error ){
+        let ser = getSeries( req );
+        // default values
+        data = {
+            ID: uuidv4(), seriesId: ser.seriesId, series: ser.series,
+            number: 1, season: 1
+        };
+    }
+    res.json( data );
+});
+
+app.post( "/save-episode", saveEpisode );
 
 app.listen(port, () => {
     console.log('The web server has started on port ' + port);
 });
+
+function saveEpisode( req, res ){
+    const newEpisode = req.body;
+    const seriesId = newEpisode.seriesId;
+    const episodeId = newEpisode.ID;
+
+    const seriesEpisodeData = getAllEpisodesInSeries( seriesId );
+
+    if( !seriesEpisodeData ){
+        throw new Error( `The series with the id ${seriesId} does not exist.` );
+    }
+
+    const id = seriesEpisodeData.findIndex( ep => ep.ID === episodeId );
+
+    if( id === undefined ){
+        seriesEpisodeData.push( newEpisode );
+    } else {
+        seriesEpisodeData[ id ] = newEpisode;
+    }
+
+    res.json({msg: "Successfully updated episode!"});
+}
+
+function getSeries( req ){
+    const seriesId = req.query.ser;
+
+    const series = getSeriesData().find( ser => ser.seriesId === seriesId );
+
+    if( !series ){
+        throw new Error( `The series with the id ${seriesId} does not exist.` );
+    }
+
+    return series;
+}
 
 function getEpisodeData( req ){
     const q = req.query;
@@ -206,7 +264,7 @@ function getEpisodeData( req ){
 }
 
 function getAllEpisodesInSeries( seriesId ){
-    let _seriesData = seriesData.find( s => s.seriesId === seriesId );
+    let _seriesData = getSeriesData().find( s => s.seriesId === seriesId );
 
     // console.log( _seriesData );
 
