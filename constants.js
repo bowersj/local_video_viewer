@@ -1,6 +1,6 @@
 const path = require("path");
 
-const root = "D:\\Media"
+const root = "E:\\Media"
 const seriesData = "_allMediaPlayerSeriesData.json"
 
 module.exports = {

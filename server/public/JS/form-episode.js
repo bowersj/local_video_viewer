@@ -13,6 +13,8 @@ let actionsRow = {
     ]
 };
 
+let loaded = false;
+
 webix.ui({
     rows:[
         { borderless:true,
@@ -24,7 +26,14 @@ webix.ui({
                     minWidth: 750,
                     maxWidth: 1250,
                     elementsConfig:{
-                        labelPosition:"top"
+                        labelPosition:"top",
+                        on: {
+                            onChange: function(){
+                                if( loaded && !$$( "episodeForm" ).validate() ){
+                                    webix.message({ text: "Make sure that all fields are valid", type: "error" })
+                                }
+                            }
+                        }
                     },
                     elements: [
                         actionsRow,
@@ -54,6 +63,13 @@ webix.ui({
                         { id:"nextEpisode", name: "nextEpisode", view: "text", value: "", label: "Location of Next Episode" },
                         webix.copy( actionsRow ),
                     ],
+                    rules:{
+                        title: webix.rules.isNotEmpty,
+                        path: webix.rules.isNotEmpty,
+                    },
+                    on:{
+                        onAfterLoad: function(){ loaded = true; }
+                    },
                     url:{
                         $proxy:true,
                         load: function( view, params ){
@@ -61,13 +77,7 @@ webix.ui({
                             let series = qs.get( "ser" );
                             let episode = qs.get( "id" );
 
-                            return webix.ajax( `/data?ser=${series}&id=${episode}` );
-
-                            // if( series && episode ){
-                            //     return webix.ajax( `/data?ser=${series}&id=${episode}` );
-                            // } else {
-                            //     return {};
-                            // }
+                            return webix.ajax( `/episode-data?ser=${series}&id=${episode}` );
                         }
                     }
                 },
@@ -78,12 +88,9 @@ webix.ui({
 });
 
 function newEpisode(){
-    webix.ajax( "/gen_id" ).then(( data )=>{
-        let id = data.text();
-        let qs = new URLSearchParams( window.location.search );
-        let series = qs.get( "ser" );
-        window.location = `/edit-episode?ser=${series}&id=${id}`;
-    });
+    let qs = new URLSearchParams( window.location.search );
+    let series = qs.get( "ser" );
+    window.location = `/edit-episode?ser=${series}`;
 }
 
 function backToEpisodes(){
@@ -93,17 +100,27 @@ function backToEpisodes(){
 }
 
 function saveForm(){
-    let data = $$( "episodeForm" ).getValues();
-    let qs = new URLSearchParams( window.location.search );
-    let series = qs.get( "ser" );
-    let episode = qs.get( "id" );
+    let form = $$( "episodeForm" );
+    if( form.validate() ) {
+        let data = form.getValues();
+        let qs = new URLSearchParams(window.location.search);
+        let series = qs.get("ser");
+        let episode = qs.get("id");
 
-    webix.ajax().post( `/save-episode?ser=${series}&id=${episode}`, data )
-        .then(( data )=>{
-            let res = data.json();
-            webix.message({ text: res.msg, type: "success" });
-        })
-        .catch(()=>{
-            webix.message({ text: "something went wrong...", type: "error" });
-        });
+        webix.ajax().post(`/save-episode?ser=${series}&id=${episode}`, data)
+            .then((data) => {
+                let res = data.json();
+                let type = "success";
+
+                if (res.err)
+                    type = "error"
+
+                webix.message({text: res.msg, type});
+            })
+            .catch(() => {
+                webix.message({text: "something went wrong...", type: "error"});
+            });
+    } else {
+        webix.message({ text: "Please ensure all values are valid before saving the data.", type: "error" })
+    }
 }
