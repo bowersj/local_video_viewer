@@ -1,13 +1,19 @@
 const path = require( "path" );
 const {episodeFileName, seriesDataRoot} = require("./../../constants.js");
+const fs = require("fs");
 
 
 module.exports = {
     getEpisodeData,
     getAllEpisodesInSeries,
     getSeriesData,
-    getSeries
+    getSeries,
+    pathExists,
+    isRelativePath
 };
+
+
+const isLetter = /[a-zA-Z]/g
 
 
 function getEpisodeData( req ){
@@ -41,7 +47,14 @@ function getAllEpisodesInSeries( seriesId ){
     if( !_seriesData )
         throw new Error( `The series id, ${seriesId}, does not exist.` );
 
-    let episodeData = require( path.join( _seriesData.path, episodeFileName ) );
+    let episodeData = [];
+
+    try {
+        episodeData = require( path.join( _seriesData.path, episodeFileName ) );
+    } catch ( err ){
+        console.error( err );
+        return [];
+    }
 
     if( !episodeData )
         throw new Error( `every series must have a file containing every episode's metadata named ${episodeFileName}` );
@@ -65,4 +78,27 @@ function getSeries( req ){
     }
 
     return series;
+}
+
+// All absolute paths start with the drive Letter
+function isRelativePath( p ){
+    const fChar = p.charAt(0);
+    return !isLetter.test( fChar );
+}
+
+function pathExists( p ){
+    if( isRelativePath( p ) ){
+        p = path.resolve( p );
+    }
+    console.log( p )
+    let stat = {};
+
+    try {
+        stat = fs.statSync( p );
+    } catch ( error ){
+        // console.error( error );
+        return error.code !== "ENOENT";
+    }
+
+    return stat.isFile() || stat.isDirectory();
 }

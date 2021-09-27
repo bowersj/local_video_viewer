@@ -13,9 +13,7 @@ function pathExists( p ){
     if( isRelativePath( p ) ){
         p = path.resolve( p );
     }
-
-    console.log( p );
-
+    console.log( p )
     let stat = {};
 
     try {
@@ -25,7 +23,7 @@ function pathExists( p ){
         return error.code !== "ENOENT";
     }
 
-    return stat.isFile();
+    return stat.isFile() || stat.isDirectory();
 }
 
-console.log( pathExists( "E:\\Media\\TV_Serries\\Castle\\season 01\\E101_Flowers for Your Grave.mp4" ) )
+console.log( pathExists( "E:\\Media\\TV_Serries\\White Collar" ) )

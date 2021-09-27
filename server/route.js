@@ -10,5 +10,9 @@ map.series = "/series"
 map.episodeData = "/episode-data"
 map.saveEpisode = "/save-episode"
 
+map.editSeries = "/edit-series"
+map.saveSeries = "/save-series"
+map.seriesData = "/series-data"
+
 
 module.exports = map;

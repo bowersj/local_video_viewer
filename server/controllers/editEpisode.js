@@ -5,7 +5,8 @@ const _ = require("./../../isType.js");
 
 const {
     getAllEpisodesInSeries,
-    getSeriesData
+    getSeriesData,
+    pathExists
 } = require( "./utils.js" );
 
 module.exports = {
@@ -75,31 +76,6 @@ function parseEpisodeData( episode ){
     episode.raters = +episode.raters;
 
     return episode
-}
-
-const isLetter = /[a-zA-Z]/g
-
-// All absolute paths start with the drive Letter
-function isRelativePath( p ){
-    const fChar = p.charAt(0);
-    return !isLetter.test( fChar );
-}
-
-function pathExists( p ){
-    if( isRelativePath( p ) ){
-        p = path.resolve( p );
-    }
-
-    let stat = {};
-
-    try {
-        stat = fs.statSync( p );
-    } catch ( error ){
-        // console.error( error );
-        return error.code !== "ENOENT";
-    }
-
-    return stat.isFile();
 }
 
 

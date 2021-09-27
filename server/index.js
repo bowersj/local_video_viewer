@@ -37,7 +37,8 @@ app.set('view engine', 'hbs');
 
 
 // routes
-app.use( "/", require( "./routes/edit.js" ) )
+app.use( "/", require( "./routes/editEpisode.js" ) )
+app.use( "/", require( "./routes/editSeries.js" ) )
 app.use( "/", require( "./routes/view.js" ) )
 
 app.get( routeFor.home, (req, res) => {

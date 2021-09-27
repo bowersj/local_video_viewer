@@ -1,4 +1,6 @@
 const exphbs = require("express-handlebars");
+const _ = require( "./../isType.js" );
+
 module.exports = {
     isGreaterThan1 (value) {
         return value > 1;
@@ -29,5 +31,9 @@ module.exports = {
         return options.fn(this).replace(
             new RegExp(' value=\"' + selected + '\"'),
             '$& selected="selected"');
+    },
+
+    defaultValue: function( a, b ){
+        return _.isNull( a ) ? b : a;
     }
 }

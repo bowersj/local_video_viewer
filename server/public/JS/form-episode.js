@@ -45,7 +45,7 @@ webix.ui({
                             step: 1,
                         },
                         { id:"title",       name: "title",       view: "text", value: "", label: "Episode Title" },
-                        { id:"imgLink",     name: "imgLink",     view: "text", value: "", label: "Image Link" },
+                        { id:"imgLink",     name: "imgLink",     view: "text", value: "", label: "Image URL" },
                         { id:"airDate",     name: "airDate",     view: "text", value: "", label: "Air Date" },
                         { id:"path",        name: "path",        view: "text", value: "", label: "Location On Disk" },
                         { id:"number",      name: "number",      view: "counter", value: 0, label: "Season Episode Number",

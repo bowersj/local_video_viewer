@@ -3,7 +3,7 @@ const {v4: uuidv4} = require("uuid");
 
 const routeFor = require( "./../route.js" );
 const { getEpisodeData, getSeriesData, getSeries } = require( "./../controllers/utils.js" );
-const { saveEpisode } = require( "./../controllers/edit.js" );
+const { saveEpisode } = require( "../controllers/editEpisode.js" );
 
 const router = express.Router();
 
@@ -19,12 +19,14 @@ router.get( routeFor.series, ( req, res )=>{
 });
 
 router.get( routeFor.editEpisode, ( req, res )=>{
-    let opts = {};
-    opts.layout = "form.hbs";
-    opts.script = [
-        { src: "./JS/form-episode.js" },
-    ];
-    res.render( "form-episode.hbs", opts );
+    let opts = {
+        formName: "Episode",
+        layout: "form.hbs",
+        script: [
+            { src: "./JS/form-episode.js" },
+        ]
+    };
+    res.render( "webix.hbs", opts );
 });
 
 router.get( routeFor.episodeData, ( req, res )=>{
