@@ -1,10 +1,16 @@
+const path = require( "path" );
 const fs = require("fs");
 const mime = require("mime-types");
 const express = require( "express" );
+
+
+const err = require( "./../errorHandler.js" );
+
 const routeFor = require( "./../route.js" );
 
 const { getAllEpisodesInSeries, getEpisodeData } = require( "./../controllers/utils.js" );
 
+const toRoot = "./" + __dirname.split( path.sep ).slice( 1 ).map( node => ".." ).join( "/" )
 const router = express.Router();
 
 
@@ -27,7 +33,7 @@ router.get( routeFor.seriesEpisodes, ( req, res ) => {
             }
         );
     } catch( error ){
-        console.error( error );
+        err.handler( error, res, 500, "[/watch]: " + error.message );
     }
 });
 
@@ -40,26 +46,27 @@ router.get( routeFor.watch, (req, res) => {
         try {
             episode = getEpisodeData( req );
         } catch( error ){
-            res.status( 404 ).send( "[/watch]: " + error.message );
+            err.handler( error, res, 404, "[/watch]: " + error.message );
             errorOccurred = true;
         }
 
         if( errorOccurred )
             return;
 
-        const { season, seriesId, series, title, ID: episodeId, nextEpisode } = episode;
+        const { season, number, seriesId, series, title, ID: episodeId, nextEpisode } = episode;
 
         const seriesEpisodeData = getAllEpisodesInSeries( seriesId );
 
         const options = {
             layout: "media-video.hbs",
             video: {
-                src: `/stream?ser=${seriesId}&id=${episodeId}`,
+                src: `/stream?id=${episodeId}`,
                 type: "video/mp4",
                 title: series,
                 subtitle: title,
             },
             season,
+            epNumber: number,
             script: [
                 { src: "./JS/app.js" },
             ],
@@ -92,15 +99,8 @@ router.get( routeFor.watch, (req, res) => {
     }
 });
 
-router.get( routeFor.stream, function (req, res) {
-    // Ensure there is a range given for the video
-    let range = req.headers.range || "0-";
-    // console.log( req.headers )
-    if (!range) {
-        res.status(400).send("Requires Range header");
-        return;
-    }
 
+router.get( routeFor.stream, function (req, res) {
     let errorOccurred = false;
     let episode = {};
 
@@ -115,15 +115,61 @@ router.get( routeFor.stream, function (req, res) {
         return;
 
 
-    const { path: videoPath } = episode;
+    let { path: videoPath } = episode;
+    videoPath = path.resolve( path.join( toRoot, videoPath ) );
+
+    streamMedia( req, res, videoPath );
+});
+
+router.get( routeFor.watchFromFile, (req, res) => {
+    try {
+        const p = req.query.path;
+        const fileName = path.basename( p ).split( "." );
+
+        // console.log( fileName )
+
+        const options = {
+            layout: "media-video.hbs",
+            video: {
+                src: `${routeFor.streamFromFile}?path=${p}`,
+                type: mime.lookup( p ),
+                title: fileName[0],
+            },
+            script: [
+                { src: "./JS/app.js" },
+            ],
+            menu:{
+                fileExplorer: true,
+                style: "position: absolute; z-index: 999;",
+            },
+        };
+        res.render( 'video', options );
+    } catch( error ){
+        console.error( error );
+    }
+});
+
+router.get( routeFor.streamFromFile, function (req, res) {
+    const path = req.query.path;
+    streamMedia( req, res, path );
+});
+
+function streamMedia( req, res, mediaPath ){
+    // Ensure there is a range given for the video
+    let range = req.headers.range || "0-";
+    // console.log( req.headers )
+    if (!range) {
+        res.status(400).send("Requires Range header");
+        return;
+    }
 
     let videoSize = 0;
 
     try {
-        videoSize = fs.statSync( videoPath ).size;
+        videoSize = fs.statSync( mediaPath ).size;
     } catch ( error ){
         console.error( error );
-        res.status(404).send("There was a problem... the video doesn't exist where it is supposed to...");
+        res.status(404).send("There was a problem... the media doesn't exist where it is supposed to...");
         return;
     }
 
@@ -139,18 +185,18 @@ router.get( routeFor.stream, function (req, res) {
         "Content-Range": `bytes ${start}-${end}/${videoSize}`,
         "Accept-Ranges": "bytes",
         "Content-Length": contentLength,
-        "Content-Type": mime.lookup( videoPath ),
+        "Content-Type": mime.lookup( mediaPath ),
     };
 
     // HTTP Status 206 for Partial Content
     res.writeHead(206, headers);
 
     // create video read stream for this particular chunk
-    const videoStream = fs.createReadStream(videoPath, { start, end });
+    const videoStream = fs.createReadStream(mediaPath, { start, end });
 
     // Stream the video chunk to the client
     videoStream.pipe(res);
-});
+}
 
 
 module.exports = router;

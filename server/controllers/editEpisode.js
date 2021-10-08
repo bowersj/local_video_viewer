@@ -2,47 +2,53 @@ const path = require("path");
 const {episodeFileName} = require("./../../constants.js");
 const fs = require("fs");
 const _ = require("./../../isType.js");
+const db = require("./../db/db.js");
+const {v4: uuidv4} = require("uuid");
+const err = require( "./../errorHandler.js" );
 
 const {
-    getAllEpisodesInSeries,
-    getSeriesData,
     pathExists
-} = require( "./utils.js" );
+} = require( "./../utils/pathHelpers.js" );
 
 module.exports = {
     saveEpisode,
     saveAllEpisodesInSeries,
     parseEpisodeData,
-
+    deleteEpisode,
 };
+
+function deleteEpisode( req, res ){
+    const episodeId = req.query.id;
+    let noError = true;
+
+    try {
+        db.removeEpisode( episodeId );
+    } catch ( error ){
+        err.handler( error );
+        res.send({ err: true, msg: error.message });
+        noError = false;
+    }
+
+    if( noError ){
+        res.send({ msg: "Success, episode deleted." });
+    }
+}
 
 function saveEpisode( req, res ){
     const newEpisode = parseEpisodeData( req.body );
-    const seriesId = newEpisode.seriesId;
-    const episodeId = newEpisode.ID;
+    newEpisode.TYPE = "episode";
 
     if( !validEpisodeData( newEpisode ) ){
-        res.json({msg: "Please ensure that the data being saved is valid.", err: true});
-        return;
+        if( isNewEpisode( newEpisode ) ){
+            newEpisode.ID = uuidv4();
+            newEpisode.new = true;
+        } else {
+            res.json({msg: "Please ensure that the data being saved is valid.", err: true});
+            return;
+        }
     }
 
-
-    const seriesEpisodeData = getAllEpisodesInSeries( seriesId );
-
-    if( !seriesEpisodeData ){
-        throw new Error( `The series with the id ${seriesId} does not exist.` );
-    }
-
-    const idx = seriesEpisodeData.findIndex( ep => ep.ID === episodeId );
-
-    if( idx === -1 ){
-        seriesEpisodeData.push( newEpisode );
-        seriesEpisodeData.sort( tvSeriesComparator )
-    } else {
-        seriesEpisodeData[ idx ] = newEpisode;
-    }
-
-    if( saveAllEpisodesInSeries( seriesId, seriesEpisodeData ) ){
+    if( db.update( newEpisode.ID, newEpisode ) ){
         res.json({msg: "Successfully updated episode!"});
     } else {
         res.json({msg: "Something went wrong. See the console...", err: true});
@@ -51,7 +57,7 @@ function saveEpisode( req, res ){
 
 
 function saveAllEpisodesInSeries( seriesId, episodeData ){
-    let _seriesData = getSeriesData().find( s => s.seriesId === seriesId );
+    let _seriesData = db.seriesData().find( s => s.seriesId === seriesId );
 
     if( !_seriesData )
         throw new Error( `The series id, ${seriesId}, does not exist.` );
@@ -80,15 +86,22 @@ function parseEpisodeData( episode ){
 
 
 function validEpisodeData( data ){
+    // console.log( data );
     // basic type verification
-    return _.isObject( data )
+    return isNewEpisode( data )
         && _.isString( data.ID )
+}
+
+function isNewEpisode( data ){
+    return _.isObject( data )
+        && _.isString( data.TYPE )
+        && data.TYPE === "episode"
         && _.isString( data.seriesId )
         && _.isString( data.series )
         && _.isString( data.title )
         && _.isString( data.path )
-        && _.isString( data.description )
 
+        && _.isStringOrNull( data.description )
         && _.isStringOrNull( data.imgLink )
         && _.isStringOrNull( data.airDate )
         && _.isStringOrNull( data.nextEpisode )
@@ -102,20 +115,4 @@ function validEpisodeData( data ){
         // check if files exist
         && pathExists( data.path )
         && (data.nextEpisode ? pathExists( data.nextEpisode ) : true)
-}
-
-function tvSeriesComparator( ep1, ep2 ){
-    if( ep1.season === ep2.season ){
-        if( ep1.number < ep2.number ){
-            return -1;
-        } else if( ep1.number > ep2.number ){
-            return 1;
-        } else {
-            return 0;
-        }
-    } else if( ep1.season > ep2.season ){
-        return 1;
-    } else {
-        return -1;
-    }
 }

@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require( "uuid" );
 
 const { walk } = require( "./../walk.js" );
 
-const { mediaRoot } = require( "./../constants.js" );
+const mediaRoot = "E:\\Media\\TV_Serries\\Merlin"
 
 // console.log( videoRoot );
 
@@ -75,6 +75,11 @@ for( let i = 0, l = episodeDataPaths.length; i < l; ++i ){
         newData = {};
         epNumStr = epData.number;
         epFileNameIndex = episodeNamesData[ season ].findIndex( ep => ep.number === epNumStr );
+
+        console.log( episodeNamesData );
+        console.log( season );
+        console.log( epNumStr );
+
         epFileName = episodeNamesData[ season ][ epFileNameIndex ].name;
 
         if( epFileNameIndex !== episodeNamesData[ season ].length - 1 )
@@ -129,4 +134,4 @@ for( let i = 0, l = episodeDataPaths.length; i < l; ++i ){
 
 
 
-fs.writeFileSync( path.join( mediaRoot, "Castle", "_mediaPlayerData.json" ), JSON.stringify( allEpisodes ), "utf8" )
+fs.writeFileSync( path.join( mediaRoot, "", "_mediaPlayerData.json" ), JSON.stringify( allEpisodes ), "utf8" )

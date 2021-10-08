@@ -1,6 +1,6 @@
 {{#each episode}}
     <div class="episode" data-episode-id="{{ID}}">
-        <a href="/watch?ser={{seriesId}}&id={{ID}}&autoStart=true" >
+        <a href="/watch?&id={{ID}}&autoStart=true" >
             <div class="image">
                     {{#if imgLink}}
                         <img src="{{imgLink}}" alt="{{series}}: {{title}}">
@@ -18,7 +18,7 @@
             {{#if airDate}}
                 <div class="air-date">Air Date: {{airDate}}</div>
             {{/if}}
-            <a href="/edit-episode?ser={{seriesId}}&id={{ID}}">Edit Data</a>
+            <a href="/edit-episode?id={{ID}}">Edit Data</a>
             <div></div>
 
             {{#if rating}}

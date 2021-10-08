@@ -1,36 +1,33 @@
 const path = require( "path" );
-const {episodeFileName, seriesDataRoot} = require("./../../constants.js");
 const fs = require("fs");
 
+const {pathExists} = require( "./../utils/pathHelpers.js" )
+const { episodeFileName, seriesDataRoot, indexNames:{ idToLoc, mediaToId } } = require("./../../constants.js");
+const db = require( "./../db/db.js" );
+const err = require( "./../errorHandler.js" );
 
 module.exports = {
     getEpisodeData,
     getAllEpisodesInSeries,
-    getSeriesData,
     getSeries,
-    pathExists,
-    isRelativePath
+    loadJSON,
 };
 
 
-const isLetter = /[a-zA-Z]/g
+function loadJSON( filePath ){
+    if( !pathExists( filePath ) )
+        throw new Error( `the filePath, ${filePath}, doesn't exist` );
+
+    return JSON.parse( fs.readFileSync( filePath, "utf8" ) );
+}
 
 
+
+// TODO add res to params
 function getEpisodeData( req ){
     const q = req.query;
-    const seriesId = q.ser;
     const episodeId = q.id;
-
-    const seriesEpisodeData = getAllEpisodesInSeries( seriesId );
-
-    if( !seriesEpisodeData ){
-        throw new Error( `The series with the id ${seriesId} does not exist.` );
-    }
-
-    // console.log( episodeId );
-    // console.log( seriesEpisodeData[0] );
-
-    const episode = seriesEpisodeData.find( ep => ep.ID === episodeId );
+    let episode = db.getEpisode( episodeId );
 
     if( !episode ){
         throw new Error( `The episode with the id ${episodeId} does not exist.` )
@@ -40,17 +37,10 @@ function getEpisodeData( req ){
 }
 
 function getAllEpisodesInSeries( seriesId ){
-    let _seriesData = getSeriesData().find( s => s.seriesId === seriesId );
-
-    // console.log( _seriesData );
-
-    if( !_seriesData )
-        throw new Error( `The series id, ${seriesId}, does not exist.` );
-
     let episodeData = [];
 
     try {
-        episodeData = require( path.join( _seriesData.path, episodeFileName ) );
+        episodeData = db.getSeriesEpisodes( seriesId );
     } catch ( err ){
         console.error( err );
         return [];
@@ -59,46 +49,17 @@ function getAllEpisodesInSeries( seriesId ){
     if( !episodeData )
         throw new Error( `every series must have a file containing every episode's metadata named ${episodeFileName}` );
 
-    // return allEpisodeData[ seriesId ];
-
     return episodeData;
-}
-
-function getSeriesData(){
-    return require( seriesDataRoot );
 }
 
 function getSeries( req ){
     const seriesId = req.query.ser;
 
-    const series = getSeriesData().find( ser => ser.seriesId === seriesId );
+    const series = db.getSeries( seriesId );
 
     if( !series ){
         throw new Error( `The series with the id ${seriesId} does not exist.` );
     }
 
     return series;
-}
-
-// All absolute paths start with the drive Letter
-function isRelativePath( p ){
-    const fChar = p.charAt(0);
-    return !isLetter.test( fChar );
-}
-
-function pathExists( p ){
-    if( isRelativePath( p ) ){
-        p = path.resolve( p );
-    }
-    console.log( p )
-    let stat = {};
-
-    try {
-        stat = fs.statSync( p );
-    } catch ( error ){
-        // console.error( error );
-        return error.code !== "ENOENT";
-    }
-
-    return stat.isFile() || stat.isDirectory();
 }

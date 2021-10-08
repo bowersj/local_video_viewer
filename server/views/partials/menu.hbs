@@ -9,6 +9,10 @@
                 <li><a href="/series_episodes?ser={{menu.episode.seriesId}}">{{menu.episode.series}}</a></li>
             {{/if}}
 
+            {{#if menu.fileExplorer }}
+                <li><a href="/file_explorer>File Explorer</a></li>
+            {{/if}}
+
             {{#if series }}
                 {{#each series}}
                     <li><a href="/series_episodes?ser={{seriesId}}">{{series}}</a></li>

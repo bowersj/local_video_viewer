@@ -3,7 +3,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Edit {{formName}}</title>
+    {{#if formName}}
+        <title>Edit {{formName}}</title>
+    {{else if name}}
+        <title>{{name}}</title>
+    {{else}}
+        <title>Form</title>
+    {{/if}}
+
+
     <link rel="stylesheet" href="http://cdn.webix.com/edge/webix.css" type="text/css">
     <script src="http://cdn.webix.com/edge/webix.js" type="text/javascript"></script>
     {{> link}}

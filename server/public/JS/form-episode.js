@@ -1,15 +1,14 @@
 let actionsRow = {
     cols:[
         {},
-        { view: "button", value: "Save", autowidth:true, css: "webix_primary",
+        { view: "button", value: "Save", autowidth:true, css: "webix_primary", 
             click: saveForm
         },
-        { view: "button", value: "Add Episode", autowidth:true,
-            click: newEpisode
+        { view: "button", value: "Delete", autowidth: true, css: "webix_danger",
+            click: deleteEpisode
         },
-        { view: "button", value: "Cancel", autowidth:true, css: "webix_danger",
-            click: backToEpisodes
-        },
+        { view: "button", value: "Add Episode",      autowidth:true, click: newEpisode },
+        { view: "button", value: "Back to Episodes", autowidth:true, click: backToEpisodes },
     ]
 };
 
@@ -38,7 +37,7 @@ webix.ui({
                     elements: [
                         actionsRow,
                         { id:"ID",          name: "ID",          view: "text",   value: "", hidden: true, },
-                        { id:"seriesId",    name: "seriesId",    view: "combo", value: "", label: "Series",
+                        { id:"seriesId",    name: "seriesId",    view: "combo",  value: "", label: "Series",
                             options: "/series"
                         },
                         { id:"season",      name: "season",      view: "counter", label: "Season Number", min: 1,
@@ -77,7 +76,7 @@ webix.ui({
                             let series = qs.get( "ser" );
                             let episode = qs.get( "id" );
 
-                            return webix.ajax( `/episode-data?ser=${series}&id=${episode}` );
+                            return webix.ajax( `/episode-data?id=${episode}` );
                         }
                     }
                 },
@@ -90,24 +89,62 @@ webix.ui({
 function newEpisode(){
     let qs = new URLSearchParams( window.location.search );
     let series = qs.get( "ser" );
-    window.location = `/edit-episode?ser=${series}`;
+    window.location = `/edit-episode`;
 }
 
 function backToEpisodes(){
     let qs = new URLSearchParams( window.location.search );
-    let series = qs.get( "ser" );
-    window.location = "/series_episodes?ser=" + series;
+    let series = qs.get( "ser" ) || $$( "seriesId" ).getValue();
+
+    if( !series ){
+        webix.ui({
+            id: "getSeriesToGoTo",
+            view:"popup",
+            position:"center",
+            modal: true,
+            width: 400, height:300,
+            body: {
+                rows:[
+                    { id:"showSeries",    name: "seriesId",    view: "combo",  value: "", label: "Series",
+                        options: "/series",
+                        on:{ onChange: function(){ $$( "goToSeries" ).enable(); } }
+                    },
+                    {
+                        cols:[
+                            {},
+                            { id: "goToSeries", view: "button", value: "Go To Series", autowidth:true, disabled: true,
+                                click: function(){
+                                    window.location = "/series_episodes?ser=" + $$( "showSeries" ).getValue();
+                                }
+                            },
+                            { width: 15 },
+                            { view: "button", value: "Cancel",       autowidth:true,
+                                click: function(){
+                                    $$( "getSeriesToGoTo" ).hide();
+                                }
+                            },
+                            {}
+                        ]
+                    }
+                ]
+            }
+        }).show();
+    } else {
+        window.location = "/series_episodes?ser=" + series;
+    }
 }
 
 function saveForm(){
     let form = $$( "episodeForm" );
     if( form.validate() ) {
         let data = form.getValues();
+        let combo = $$( "seriesId" );
+        data.series = combo.getList().getItem( combo.getValue() ).value;
+        console.log( data );
         let qs = new URLSearchParams(window.location.search);
-        let series = qs.get("ser");
         let episode = qs.get("id");
 
-        webix.ajax().post(`/save-episode?ser=${series}&id=${episode}`, data)
+        webix.ajax().post(`/save-episode?&id=${episode}`, data)
             .then((data) => {
                 let res = data.json();
                 let type = "success";
@@ -123,4 +160,23 @@ function saveForm(){
     } else {
         webix.message({ text: "Please ensure all values are valid before saving the data.", type: "error" })
     }
+}
+
+function deleteEpisode(){
+    let qs = new URLSearchParams(window.location.search);
+    let episode = qs.get("id");
+
+    webix.ajax().post(`/delete-episode?&id=${episode}`)
+        .then((data) => {
+            let res = data.json();
+            let type = "success";
+
+            if (res.err)
+                type = "error"
+
+            webix.message({text: res.msg, type});
+        })
+        .catch(() => {
+            webix.message({text: "something went wrong...", type: "error"});
+        });
 }

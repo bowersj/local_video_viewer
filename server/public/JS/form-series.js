@@ -4,12 +4,11 @@ let actionsRow = {
         { view: "button", value: "Save", autowidth:true, css: "webix_primary",
             click: saveForm
         },
-        { view: "button", value: "Add Series", autowidth:true,
-            click: newSeries
+        { view: "button", value: "Delete", autowidth: true, css: "webix_danger",
+            click: deleteSeries
         },
-        { view: "button", value: "Cancel", autowidth:true, css: "webix_danger",
-            click: backToSeries
-        },
+        { view: "button", value: "Add Series",     autowidth:true, click: newSeries },
+        { view: "button", value: "Back to Series", autowidth:true, click: backToSeries },
     ]
 };
 
@@ -40,7 +39,6 @@ webix.ui({
                         { id:"seriesId",    name: "seriesId",    view: "text",     value: "", hidden: true, },
                         { id:"series",      name: "series",      view: "text",     value: "", label: "Series Name" },
                         { id:"imgSrc",      name: "imgSrc",      view: "text",     value: "", label: "Image URL" },
-                        { id:"path",        name: "path",        view: "text",     value: "", label: "Location On Disk" },
                         { id:"description", name: "description", view: "textarea", value: "", label: "Description",
                             maxHeight: 300
                         },
@@ -48,7 +46,6 @@ webix.ui({
                     ],
                     rules:{
                         series: webix.rules.isNotEmpty,
-                        path:   webix.rules.isNotEmpty,
                     },
                     on:{
                         onAfterLoad: function(){ loaded = true; }
@@ -96,4 +93,23 @@ function saveForm(){
     } else {
         webix.message({ text: "Please ensure all values are valid before saving the data.", type: "error" })
     }
+}
+
+function deleteSeries(){
+    let qs = new URLSearchParams(window.location.search);
+    let series = qs.get("ser");
+
+    webix.ajax().post(`/delete-series?&id=${series}`)
+        .then((data) => {
+            let res = data.json();
+            let type = "success";
+
+            if (res.err)
+                type = "error"
+
+            webix.message({text: res.msg, type});
+        })
+        .catch(() => {
+            webix.message({text: "something went wrong...", type: "error"});
+        });
 }

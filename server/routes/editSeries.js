@@ -4,7 +4,7 @@ const routeFor = require( "./../route.js" );
 
 const { getSeries} = require( "./../controllers/utils.js" );
 const {v4: uuidv4} = require("uuid");
-const {saveSeries} = require("../controllers/editSeries.js");
+const {saveSeries, deleteSeries} = require("../controllers/editSeries.js");
 
 const router = express.Router();
 
@@ -27,5 +27,6 @@ router.get( routeFor.seriesData, ( req, res )=>{
 });
 
 router.post( routeFor.saveSeries, saveSeries );
+router.post( routeFor.deleteSeries, deleteSeries );
 
 module.exports = router;
