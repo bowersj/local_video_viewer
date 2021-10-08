@@ -1,5 +1,6 @@
 #intellij
-.idea
+.idea/*
+.vscode/*
 
 # Logs
 logs
